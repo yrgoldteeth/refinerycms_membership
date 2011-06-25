@@ -39,11 +39,11 @@ class Member < User
   end
 
   def ensure_member_role
-    roles << Role.find(MEMBER_ROLE_ID) unless role_ids.include?(MEMBER_ROLE_ID)
+    roles << ::Refinery::Role.find(MEMBER_ROLE_ID) unless role_ids.include?(MEMBER_ROLE_ID)
   end
 
   def remove_member_role
-    roles.delete(Role.find(MEMBER_ROLE_ID)) if role_ids.include?(MEMBER_ROLE_ID)
+    roles.delete(::Refinery::Role.find(MEMBER_ROLE_ID)) if role_ids.include?(MEMBER_ROLE_ID)
   end
 
   def nil_paid_until

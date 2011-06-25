@@ -17,8 +17,8 @@ class Admin::MembershipsController < Admin::BaseController
   def index
     respond_to do |format|
       format.html { 
-        @pages = Page.all
-        @roles = Role.find_all_by_id(MEMBER_ROLE_ID)
+        @pages = ::Refinery::Page.all
+        @roles = ::Refinery::Role.find_all_by_id(MEMBER_ROLE_ID)
       }
       format.js{ 
         @objects = current_objects(params)
@@ -31,7 +31,7 @@ class Admin::MembershipsController < Admin::BaseController
 private
   def current_objects(params={})
     current_page = (params[:iDisplayStart].to_i/params[:iDisplayLength].to_i rescue 0)+1
-    @current_objects = Member.paginate :page => current_page,
+    @current_objects = ::Refinery::Member.paginate :page => current_page,
       :include => :roles,
       :order => "#{datatable_columns(params[:iSortCol_0])} #{params[:sSortDir_0] || "DESC"}",
       :conditions => conditions,
@@ -39,7 +39,7 @@ private
   end
 
   def total_objects(params={})
-    @total_objects = Member.count :conditions => conditions
+    @total_objects = ::Refinery::Member.count :conditions => conditions
   end
 
   def datatable_columns(column_id)
@@ -90,7 +90,7 @@ private
   def parse_roles(params, &block)
     respond_to_json do
       items = get_items(params)
-      roles = Role.find(params[:role_ids])
+      roles = ::Refinery::Role.find(params[:role_ids])
 
       block.call(items, roles) unless items.blank? || roles.blank?
     end

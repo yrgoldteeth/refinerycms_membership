@@ -3,7 +3,7 @@ class Admin::UserRolesController < Admin::MembershipsController
   # PUT /refinery/user_roles/:id <-- member_id bad REST, but convenient for this!
   def update
 
-    @member = Member.find(params[:id])
+    @member = ::Refinery::Member.find(params[:id])
     case params[:switch]
     when 'extend'
       extend_member(@member)
@@ -24,26 +24,26 @@ class Admin::UserRolesController < Admin::MembershipsController
 private
   def extend_member(member)
     member.activate
-    MembershipMailer.extension_confirmation_member(member).deliver
-    MembershipMailer.extension_confirmation_admin(member, current_user).deliver
+    ::Refinery::MembershipMailer.extension_confirmation_member(member).deliver
+    ::Refinery::MembershipMailer.extension_confirmation_admin(member, current_user).deliver
   end
 
   def cancel_member(member)
     member.deactivate
-    MembershipMailer.cancellation_confirmation_member(member).deliver
-    MembershipMailer.cancellation_confirmation_admin(member, current_user).deliver
+    ::Refinery::MembershipMailer.cancellation_confirmation_member(member).deliver
+    ::Refinery::MembershipMailer.cancellation_confirmation_admin(member, current_user).deliver
   end
 
   def accept_member(member)
     member.activate
-    MembershipMailer.acceptance_confirmation_member(member).deliver
-    MembershipMailer.acceptance_confirmation_admin(member, current_user).deliver
+    ::Refinery::MembershipMailer.acceptance_confirmation_member(member).deliver
+    ::Refinery::MembershipMailer.acceptance_confirmation_admin(member, current_user).deliver
   end
 
   def reject_member(member)
     member.deactivate
-    MembershipMailer.rejection_confirmation_member(member).deliver
-    MembershipMailer.rejection_confirmation_admin(member, current_user).deliver
+    ::Refinery::MembershipMailer.rejection_confirmation_member(member).deliver
+    ::Refinery::MembershipMailer.rejection_confirmation_admin(member, current_user).deliver
   end
 
 

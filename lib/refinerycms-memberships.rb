@@ -16,7 +16,7 @@ module Refinery
 
         # this broke as part of config.to_prepare
         # Do this or lost password non-admins still goes to the dashboard
-        ::Admin::DashboardController.class_eval do
+        ::Refinery::Admin::DashboardController.class_eval do
           old_index = instance_method(:index)
           define_method(:index){|*args|
             if current_user.has_role?(:super_user) || current_user.has_role?(:refinery)
@@ -32,11 +32,11 @@ module Refinery
         require File.expand_path('../rails_datatables/rails_datatables', __FILE__)
         ActionView::Base.send :include, RailsDatatables
 
-        Role.class_eval do
+        ::Refinery::Role.class_eval do
           has_and_belongs_to_many :pages
         end
 
-        Page.class_eval do
+        ::Refinery::Page.class_eval do
           has_and_belongs_to_many :roles
 
           def user_allowed?(user)
@@ -56,13 +56,13 @@ module Refinery
               end
             end
           end
-        end # Page.class_eval
+        end # ::Refinery::Page.class_eval
       end # config.to_prepare
       refinery.after_inclusion do
-        PagesController.class_eval do
+        ::Refinery::PagesController.class_eval do
           def show
             # Find the page by the newer 'path' or fallback to the page's id if no path.
-            @page = Page.find(params[:path] ? params[:path].to_s.split('/').last : params[:id],
+            @page = ::Refinery::Page.find(params[:path] ? params[:path].to_s.split('/').last : params[:id],
               :include => :roles)
 
             if @page.user_allowed?(current_user) &&

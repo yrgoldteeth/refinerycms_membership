@@ -7,19 +7,19 @@ class MembersController < ApplicationController
 
   # GET /member/:id
   def show
-    @page = Page.find_by_link_url('/member_show')
+    @page = ::Refinery::Page.find_by_link_url('/member_show')
   end
 
   def new
-    @member = Member.new
-    @page = Page.find_by_link_url('/members/new')
+    @member = ::Refinery::Member.new
+    @page = ::Refinery::Page.find_by_link_url('/members/new')
   end
 
   # GET /members/:id/edit
   def edit
     @member = get_member(params[:id])
     @is_admin = is_admin?
-    @page = Page.find_by_link_url('/member_edit')
+    @page = ::Refinery::Page.find_by_link_url('/member_edit')
   end
 
   # PUT /members/:id
@@ -49,30 +49,30 @@ class MembersController < ApplicationController
 
     if @member.update_attributes(params[:member])
       flash[:notice] = t('successful', :scope => 'members.update', :email => @member.email)
-      MembershipMailer.profile_update_notification_admin(@member).deliver unless is_admin?
+      ::Refinery::MembershipMailer.profile_update_notification_admin(@member).deliver unless is_admin?
       redirect_to(is_admin? ? admin_memberships_path : root_path )
 
     else
       @is_admin = is_admin?
-      @page = Page.find_by_link_url('/member_edit')
+      @page = ::Refinery::Page.find_by_link_url('/member_edit')
       render :action => 'edit'
     
     end
   end
 
   def create
-    @member = Member.new(params[:member])
+    @member = ::Refinery::Member.new(params[:member])
     @member.username = @member.email
     @member.membership_level = 'Member'
 
     if @member.save
-      MembershipMailer.application_confirmation_member(@member).deliver
-      MembershipMailer.application_confirmation_admin(@member).deliver
+      ::Refinery::MembershipMailer.application_confirmation_member(@member).deliver
+      ::Refinery::MembershipMailer.application_confirmation_admin(@member).deliver
       
       redirect_to(is_admin? ? admin_memberships_path : root_path )
 
     else
-      @page = Page.find_by_link_url('/members/new')
+      @page = ::Refinery::Page.find_by_link_url('/members/new')
       @member.errors.delete(:username) # this is set to email
       render :action => :new
       
@@ -87,7 +87,7 @@ class MembersController < ApplicationController
   def index
     respond_to do |format|
       format.html{
-        @page = Page.find_by_link_url('/members')
+        @page = ::Refinery::Page.find_by_link_url('/members')
       }
       format.js{
         @objects = current_objects(params)
@@ -101,7 +101,7 @@ class MembersController < ApplicationController
 
   def current_objects(params={})
     current_page = (params[:iDisplayStart].to_i/params[:iDisplayLength].to_i rescue 0)+1
-    @current_objects = Member.paginate :page => current_page,
+    @current_objects = ::Refinery::Member.paginate :page => current_page,
       :include => [:roles],
       :order => "#{datatable_columns(params[:iSortCol_0])} #{params[:sSortDir_0] || "DESC"}",
       :conditions => conditions,
@@ -109,8 +109,8 @@ class MembersController < ApplicationController
   end
 
   def total_objects(params={})
-    all = Member.count(:include => [:roles], :conditions => conditions)
-    admins = Member.count(:include => :roles, :conditions => "roles.id in (#{REFINERY_ROLE_ID},#{SUPERUSER_ROLE_ID})")
+    all = ::Refinery::Member.count(:include => [:roles], :conditions => conditions)
+    admins = ::Refinery::Member.count(:include => :roles, :conditions => "roles.id in (#{REFINERY_ROLE_ID},#{SUPERUSER_ROLE_ID})")
     @total_objects = all - admins
   end
 
@@ -149,14 +149,14 @@ class MembersController < ApplicationController
 
   def accept_member(member)
     member.activate
-    MembershipMailer.acceptance_confirmation_member(member).deliver
-    MembershipMailer.acceptance_confirmation_admin(member, current_user).deliver
+    ::Refinery::MembershipMailer.acceptance_confirmation_member(member).deliver
+    ::Refinery::MembershipMailer.acceptance_confirmation_admin(member, current_user).deliver
   end
 
   def reject_member(member)
     member.deactivate
-    MembershipMailer.rejection_confirmation_member(member).deliver
-    MembershipMailer.rejection_confirmation_admin(member, current_user).deliver
+    ::Refinery::MembershipMailer.rejection_confirmation_member(member).deliver
+    ::Refinery::MembershipMailer.rejection_confirmation_admin(member, current_user).deliver
   end
 
 protected
@@ -168,7 +168,7 @@ protected
 
   # unless you're an admin, you can only edit your profile
   def get_member(id)
-    is_admin? ?  Member.find(id) : current_user
+    is_admin? ?  ::Refinery::Member.find(id) : current_user
   end
 
   def is_admin?
